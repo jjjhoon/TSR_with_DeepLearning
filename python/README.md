@@ -1,5 +1,5 @@
 # Python Directory
-Python is used for verifying my algorithm, and estimate accuracy. Using TensorFlow for algorithm, and [GTSRB(German Traffic Sign Recognition Benchmark)](http://benchmark.ini.rub.de/?section=gtsrb&subsection=news) as a training/test dataset.
+Python is used for verifying my algorithm, and estimate accuracy. Using [TensorFlow](https://www.tensorflow.org/) for algorithm, and [GTSRB(German Traffic Sign Recognition Benchmark)](http://benchmark.ini.rub.de/?section=gtsrb&subsection=news) as a training/test dataset.
 
 * TSRwithInception.py is for top architecture
 * ReadTrainData.py is reading GTSRB data from your hard-drive and load it on to your DDR main memory
