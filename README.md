@@ -3,8 +3,8 @@ TSR(Traffic Sign Recognition) using TensorFlow to adopting deep neural network
 
 This project's final goal is real time ADAS system including
 * TSR - Traffic Sign Recognition
-* LD/LDWS - Lane Detection and Lane Departure Warning System
-* VD - Vehicle Detection
+* LD/LDWS - Lane Detection and Lane Departure Warning System (Done, but cannot share codes due to confidential reason)
+* VD - Vehicle Detection (NOT STARTED)
 
 ## Software
 Software will be build with Python 2.7 and C/C++. Using CNN(Convolutional Neural Network) architecture via TensorFlow.
