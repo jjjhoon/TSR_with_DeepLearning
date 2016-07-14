@@ -1,14 +1,34 @@
+'''
+Module Author : Jonghoon Kang
+Created       : 24th June, 2016
+Modified      : 27th June, 2016 (2nd)
+Module Name   : ReadTrainData.py
+Description   : Read images from GTSRB data set (Test and Train dataset both)
+				Refer to GTSRB data set - http://benchmark.ini.rub.de/
+				+
+				You must download the dataset before use this code
+				- In test dataset you must get "Extended annotations including class ids" csv file
+				Reading DB is referenced by GTSRB organizer's engineer
+Usage          : Use function for 
+					-Reading training set
+						ReadFiles.feedTrainSet()
+					-Reading test set
+						ReadFiles.feedTestSet()
+					Above functions are return images and labels in amount of "Batch_size"
+'''
 import matplotlib.pyplot as plt
 import PIL
+import Image
 import csv
 import tensorflow as tf
 import random
+import os
 
 TRAIN_SET_DIR = '/home/jonghoon/GTSRB/TrainImages'
 TEST_SET_DIR = '/home/jonghoon/GTSRB/TestImages'
 
 class ReadFiles(object):
-    def __init__(self, batch_size, TRAIN_SET_DIR, TEST_SET_DIR, DEBUG=True):
+    def __init__(self, batch_size, TRAIN_SET_DIR, TEST_SET_DIR, DEBUG=False):
         self._DEBUG = DEBUG
         self._batch_size = batch_size
         self._trainSize = 0     # Number of train images/labels 
@@ -23,9 +43,27 @@ class ReadFiles(object):
         self._loadTrainDone = False
         self._TRAIN_SET_DIR = TRAIN_SET_DIR
         self._TEST_SET_DIR = TEST_SET_DIR
+        self._TRAIN_SET_DIR_LINEAR = TRAIN_SET_DIR + '/linearTestSet/'
         self._batchImages = []
         self._batchLabels = []
-        print 'ReadFiles begins'
+        self._trainReOrdered = False
+        if DEBUG:
+        	print 'ReadFiles begins'
+
+	def debuggingMethod(self):
+		trainImgLen = len(self._trainImages)
+		trainLabLen = len(self._trainLabels)
+		testImgLen = len(self._testImages)
+		testLabLen = len(self._testLabels)
+		print 'Number of train images are : ' + str(trainImgLen)
+		print 'Number of train labels are : ' + str(trainLabLen)
+		print 'Number of test images are : ' + str(testImgLen)
+		print 'Number of test labels are : ' + str(testLabLen)
+	
+	def debug2print(self):
+		for i in range(0, len(self._batchLabels)):
+			print 'BatchLabels ' + str(i)
+			print '       ' + str(self._batchLabels)
 
     #@trainCount.setter
     #def trainCount_setter(self, num):
@@ -66,6 +104,18 @@ class ReadFiles(object):
     #def batchSize_setter(self, num):
     #    print '_batch_size setter called'
     #    self._batch_size = num
+
+	def maybeReStoreTrainData(self):
+		# This method is called when the initial codes called form top architecture
+		# to store the GTSRB data set into serial directory
+    	
+		if not os.path.exists(self._TRAIN_SET_DIR_LINEAR):
+			os.mkdir(self._TRAIN_SET_DIR_LINEAR)
+			print 'New directory successfully created in ' + self._TRAIN_SET_DIR_LINEAR
+		
+		for i in range(0, len(images)):
+
+
 
     def readTrainTrafficSigns(self):
         '''Reads traffic sign data for German Traffic Sign Recognition Benchmark.
@@ -108,54 +158,74 @@ class ReadFiles(object):
         self._testImages = images
         self._testLabels = labels
 
-    def ndarray2tensor(self, train_test):
-        newImages = []
-        newLabels = [] 
-        if train_test == 'TRAIN':
-            self._batchImages = self._trainImages
-            self._batchLabels = self._trainLabels
-        elif train_test == 'TEST':
-            self._batchImages = self._testImages
-            self._batchLabels = self._testLabels
-        else:
-            print 'In class ''ReadFiles'' ReadFiles.ndarray2tensor method argument must be ''TEST'' or ''TRAIN'''
+    def ndarray2tensor(self, train_test, feed = True):
+		if feed == False:
+			newImages = []
+			#newLabels = [] 
+			if train_test == 'TRAIN':
+				images = self._trainImages
+				labels = self._trainLabels
+			elif train_test == 'TEST':
+				images = self._testImages
+				labels = self._testLabels
+			else:
+				print 'In class ''ReadFiles'' ReadFiles.ndarray2tensor method argument must be ''TEST'' or ''TRAIN'''
 
-        for i in range(0, len(images)):
-            intImage = tf.convert_to_tensor(images[i], dtype=tf.float32)
-            newLabels.append(tf.convert_to_tensor(images[i], dtype=tf.float32))
-            newImages.append(tf.image.resize_images(intImage, 300, 300))
-            if (self._DEBUG == True) & (i % 1000 == 0):
-                print str(i) + 'st converting finished'
-                print 'Resizing finished'
+		if self._DEBUG:
+			print 'ReadFiles.ndarray2tensor(), Start to typecasting and resizing'
+		
+		if feed:
+			for i in range(0, len(self._batchImages)):
+				intImage = tf.convert_to_tensor(self._batchImages[i], dtype=tf.float32)
+				self._batchImages[i] = tf.image.resize_images(intImage, 300, 300)
+				#self._batchLabels[i] = tf.convert_to_tensor(self._batchLabels[i], dtype=tf.int32)
+		else:
+			for i in range(0, len(images)):
+				intImage = tf.convert_to_tensor(images[i], dtype=tf.float32)
+				#newLabels.append(tf.convert_to_tensor(labels, dtype=tf.int32))
+				newImages.append(tf.image.resize_images(intImage, 300, 300))
+				if (self._DEBUG == True) & (i % 1000 == 0):
+					print str(i) + 'st converting finished'
+					print 'Resizing finished'
 
-        if train_test == 'TRAIN':
-            self._trainImages = newImages
-            self._trainLabels = newLabels
-        elif train_test == 'TEST':
-            self._testImages = newImages
-            self._testImages = newLabels
-        else:
-            print 'In class ''ReadFiles'' ReadFiles.ndarray2tensor method argument must be ''TEST'' or ''TRAIN'''
+		if feed == False:
+			if train_test == 'TRAIN':
+				self._trainImages = newImages
+				#self._trainLabels = newLabels
+			elif train_test == 'TEST':
+				self._testImages = newImages
+				#self._testLabels = newLabels
+			else:
+				print 'In class ''ReadFiles'' ReadFiles.ndarray2tensor method argument must be ''TEST'' or ''TRAIN'''
+
+		if self._DEBUG:
+			print 'ReadFiles.ndarray2tensor(), finished to typecasting and resizing'
         
     def shuffleLists(self, train_test):
-        if train_test == 'TRAIN':
-            sortedImages = self._trainImages
-            sortedLabels = self._trainLabels
-        elif train_test == 'TEST':
-            sortedImages = self._testImages
-            sortedLabels = self._testLabels
-        else:
-            print 'In class ''ReadFiles'' ReadFiles.shuffleLists method argument must be ''TEST'' or ''TRAIN'''
+		if self._DEBUG:
+			print 'ReadFiles.shuffleLists(), begin to shuffle ndarrays'
 
-        shuffleData = zip(sortedImages, sortedLabels)
-        random.shuffle(shuffleData)
+		if train_test == 'TRAIN':
+			sortedImages = self._trainImages
+			sortedLabels = self._trainLabels
+		elif train_test == 'TEST':
+			sortedImages = self._testImages
+			sortedLabels = self._testLabels
+		else:
+			print 'In class ''ReadFiles'' ReadFiles.shuffleLists method argument must be ''TEST'' or ''TRAIN'''
 
-        if train_test == 'TRAIN':
-            self._trainImages, self._trainLabels = zip(*shuffleData)
-        elif train_test == 'TEST':
-            self._testImages, self._testLabels = zip(*shuffleData)
-        else:
-            print 'In class ''ReadFiles'' ReadFiles.shuffleLists method argument must be ''TEST'' or ''TRAIN'''
+		shuffleData = zip(sortedImages, sortedLabels)
+		random.shuffle(shuffleData)
+
+		if train_test == 'TRAIN':
+			self._trainImages, self._trainLabels = zip(*shuffleData)
+		elif train_test == 'TEST':
+			self._testImages, self._testLabels = zip(*shuffleData)
+		else:
+			print 'In class ''ReadFiles'' ReadFiles.shuffleLists method argument must be ''TEST'' or ''TRAIN'''
+
+		if self._DEBUG:
+			print 'ReadFiles.shuffleLists(), finished to shuffle ndarrays'
 
     def setTrainSize(self):
         if len(self._trainImages) == len(self._trainLabels):
@@ -181,7 +251,7 @@ class ReadFiles(object):
     def loadTrainSet(self):
         train_test = 'TRAIN'
         self.readTrainTrafficSigns()
-        self.ndarray2tensor(train_test)
+        self.ndarray2tensor(train_test, feed = False)
         self.shuffleLists(train_test)
         self._loadTrainDone = self.setTrainSize()
         if self._loadTrainDone:
@@ -195,7 +265,7 @@ class ReadFiles(object):
     def loadTestSet(self):
         train_test = 'TEST'
         self.readTestTrafficSigns()
-        self.ndarray2tensor(train_test)
+        self.ndarray2tensor(train_test, feed = False)
         self.shuffleLists(train_test)
         self.setTestSize()
         self._loadTestDone = self.setTestSize()
@@ -215,44 +285,71 @@ class ReadFiles(object):
         else:
             print 'Failed to load all test and train set'
 
-    def feedTrainSet(self):
-        feedImages = []
-        feedLabels = []
-        train_test = 'TRAIN'
-        self.readTrainTrafficSigns()
-        self.shuffleLists(train_test)
-        self.setTrainSize()
-        if self._loadTrainDone:
-            print 'File Queue is Ready to feed'
-        else :
-            print 'Failed to queueing the file queue'
+    def feedTrainSet(self, initStatus = False):
+		self._batchImages = []
+		self._batchLabels = []
+		train_test = 'TRAIN'
+		if initStatus:
+			self.readTrainTrafficSigns()
+			self.shuffleLists(train_test)
+			self.setTrainSize()
+			if self._loadTrainDone:
+				print 'File Queue is Ready to feed'
+			else:
+				print 'Failed to quieing the file queue'
 
-        for i in range(self._trainCount, self._trainCount + batch_size):
-            feedImages.append(self._trainImages)
+		for i in range(self._trainCount, self._trainCount + self._batch_size):
+			self._batchImages.append(self._trainImages[self._trainCount])
+			self._batchLabels.append(self._trainLabels[self._trainCount])
 
-    def feedTestSet(self):
-        feedImages = []
-        feedLabels = []
-        train_test = 'TEST'
-        self.readTestTrafficSigns()
-        self.shuffleLists(train_test)
-        self.setTestSize()
-        if self._loadTestDone:
-            print 'File Queue is Ready to feed'
-        else:
-            print 'Failed to queueing the file queue'
+		if self._DEBUG:
+			print 'BatchLabels ' + str(self._batchLabels)
+			#for i in range(0, len(self._batchImages)):
+			#	plt.imshow(self._batchImages[i])
+			#	plt.show()
 
-    def debugginMethod(self):
-        trainImgLen = len(self._trainImages)
-        trainLabLen = len(self._trainLabels)
-        testImgLen = len(self._testImages)
-        testLabLen = len(self._testLabels)
-        print 'Number of train images are : ' + str(trainImgLen)
-        print 'Number of train labels are : ' + str(trainLabLen)
-        print 'Number of test images are : ' + str(testImgLen)
-        print 'Number of test labels are : ' + str(testLabLen)
+		self._trainCount += self._batch_size
+		self.ndarray2tensor(train_test)
 
-test = ReadFiles(batch_size = 20, TRAIN_SET_DIR = TRAIN_SET_DIR, TEST_SET_DIR = TEST_SET_DIR)
+		if self._DEBUG:
+			print 'Value of ''_trainCount'' : ' + str(self._trainCount)
+			print 'Size of ''_batchImages'' : ' + str(len(self._batchImages))
+			print 'Size of ''_batchLabels'' : ' + str(len(self._batchLabels))
+
+    def feedTestSet(self, initStatus = False):
+		feedImages = []
+		feedLabels = []
+		train_test = 'TEST'
+		if initStatus:
+			self.readTestTrafficSigns()
+			self.shuffleLists(train_test)
+			self.setTestSize()
+			if self._loadTestDone:
+				print 'File Queue is Ready to feed'
+			else:
+				print 'Failed to queueing the file queue'
+
+		for i in range(self._testCount, self._testCount + self._batch_size):
+			self._batchImages.append(self._testImages[self._testCount])
+			self._batchLabels.append(self._testLabels[self._testCount])
+
+		if self._DEBUG:
+			print 'BatchLabels ' + str(self._batchLabels)
+
+		self._testCount += self._batch_size
+		self.ndarray2tensor(train_test)
+		if self._DEBUG:
+			print 'Value of ''_testCount''  : ' + str(self._testCount)
+			print 'Size of ''_batchImages'' : ' + str(len(self._batchImages))
+			print 'Size of ''_batchLabels'' : ' + str(len(self._batchLabels))
+
+test = ReadFiles(batch_size = 20, TRAIN_SET_DIR = TRAIN_SET_DIR, TEST_SET_DIR = TEST_SET_DIR, DEBUG = True)
 #test2 = test.loadAllImagesAndLabels()
-test2 = test.readTrainTrafficSigns()
-test3 = test.readTestTrafficSigns()
+#test2 = test.readTrainTrafficSigns()
+#test3 = test.readTestTrafficSigns()
+flag = True
+for i in range(0, 1000):
+	test4 = test.feedTrainSet(initStatus = flag)
+	flag = False
+
+test.debuggingMethod()
