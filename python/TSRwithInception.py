@@ -1,11 +1,12 @@
-#Module Author : Jonghoon Kang
-#Created       : 27th June, 2016
-#Modified      : 
-#Module Name   : TSRwithInception.py
-#Description   : TSR(Traffic Sign Recognition) application implementation via 
-#                Deep Neural Network. This source code include, training and testing
-#                scheme. Refer to comment blocks
-
+'''
+Module Author : Jonghoon Kang
+Created       : 27th June, 2016
+Modified      : 7th July, 2016 (2nd)
+Module Name   : TSRwithInception.py
+Description   : TSR(Traffic Sign Recognition) application implementation via 
+                Deep Neural Network. This source code include, training and testing
+                scheme. Refer to comment blocks
+'''
 import Inception_ResNet
 import numpy as np
 
@@ -15,13 +16,11 @@ def init_weights(shape):
 def inputInitialize():
 	testImage = tf.placeholder("float", [None, 300, 300, 3])
 	testLabel = tf.placeholder("float", [None, 43])
-	trainImage = 
-	trainLabel = 
 
 # Variables and Weights Initialization
 # Refer to the documents "TSR_application_Jonghoon_vX.docx"
 # in file name, vX means version of documents. 
-# You can find document from my server directory. lol find it  
+# You can find document from my server directory. lol have fun to find it  
 
 if TRAINING:
 	# Weight format description
@@ -86,7 +85,7 @@ if TRAINING:
 	fc_w1 = init_weights([1*1*1792, 1792])
 	fc_w2 = init_weights([1792, 43])
 
-else if PRE_TRAINED:
+elif PRE_TRAINED:
 else:
 	print 'In jhIception_top.py, wrong definition of PRE_TRAINED or TRAINING parameter'
 
@@ -110,19 +109,19 @@ if TRAINING:	# Training and Graph shows
 										l7_w = stem_w9,
 										l8_w = stem_w10,
 										l9_w = stem_w11
-								   )
+									)
 	
 	with tf.name_scope("Inception-ResNet-A") as scope:
 		aOut = inception_ResNet.incResA(
-					   inData = stemOut,
-		               l1_1_w = incResA_w1,
-		               l1_2_w = incResA_w2,
-		               l1_3_w = incResA_w3,
-		               l2_1_w = incResA_w4,
-		               l2_2_w = incResA_w5,
-		               l3_w = incResA_w6,
-		               l4_w = incResA_w7
-		              )
+						inData = stemOut,
+						l1_1_w = incResA_w1,
+						l1_2_w = incResA_w2,
+						l1_3_w = incResA_w3,
+						l2_1_w = incResA_w4,
+						l2_2_w = incResA_w5,
+						l3_w = incResA_w6,
+						l4_w = incResA_w7
+						)
 	
 	with tf.name_scope("Inception-ResNet-Reduction-A") as scope:
 		red_A_Out = inception_ResNet.reDuctionLayerA(
@@ -131,17 +130,17 @@ if TRAINING:	# Training and Graph shows
 									l1_2_w = redA_w2,
 									l2_w = redA_w3,
 									l3_w = redA_w4
-								   )
+									)
 	
 	with tf.name_scope("Inception-ResNet-B") as scope:
 		bOut = inception_ResNet.incResB(
-					   inData = red_A_Out,
-					   l1_1_w = incResB_w1,
-					   l1_2_w = incResB_w2,
-					   l2_w = incResB_w3,
-					   l3_w = incResB_w4,
-					   l4_w = incResB_w5
-					  )
+						inData = red_A_Out,
+						l1_1_w = incResB_w1,
+						l1_2_w = incResB_w2,
+						l2_w = incResB_w3,
+						l3_w = incResB_w4,
+						l4_w = incResB_w5
+						)
 	
 	with tf.name_scope("Inception-ResNet-Reduction-B") as scope:
 		red_B_Out = inception_ResNet.reDuctionLayerB(
@@ -153,7 +152,7 @@ if TRAINING:	# Training and Graph shows
 									l2_2_w = redB_w5,
 									l2_3_w = redB_w6,
 									l3_w = redB_w7
-								   )
+									)
 	
 	with tf.name_scope("Inception-ResNet-C") as scope:
 		cOut = inception_ResNet.incResC(
@@ -163,7 +162,7 @@ if TRAINING:	# Training and Graph shows
 						l2_w = incResC_w3,
 						l3_w = incResC_w4,
 						l4_w = incResC_w5
-					  )
+						)
 	
 	with tf.name_scope("AveragePooling") as scope:
 		# Average pooling layer and make it 1x1 full connected layer
@@ -180,16 +179,16 @@ if TRAINING:	# Training and Graph shows
 
 	result = softMax
 
-else if PRE_TRAINED:	# Only for Inference
+elif PRE_TRAINED:	# Only for Inference
 
 else:
 	print 'In jhIception_top.py, wrong definition of PRE_TRAINED or TRAINING parameter'
 	result = 0.0
 
 if TRAINING:
-	train_operation = tf.train.RMSPropOptimizer(learning_rate = 0.045, decay = 0,94)
+	train_operation = tf.train.RMSPropOptimizer(learning_rate = 0.045, decay = 0.94)
 	predict_op = tf.argmax(result, 1)
-else if PRE_TRAINED:
+elif PRE_TRAINED:
 	cost = tf.reduce_mean(result)
 	predict_op = tf.argmax(result, 1)
 else:

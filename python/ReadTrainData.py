@@ -1,7 +1,7 @@
 '''
 Module Author : Jonghoon Kang
 Created       : 24th June, 2016
-Modified      : 27th June, 2016 (2nd)
+Modified      : 7th July, 2016 (4th)
 Module Name   : ReadTrainData.py
 Description   : Read images from GTSRB data set (Test and Train dataset both)
 				Refer to GTSRB data set - http://benchmark.ini.rub.de/
