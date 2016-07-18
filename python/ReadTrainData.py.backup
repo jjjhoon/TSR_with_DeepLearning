@@ -24,8 +24,8 @@ import tensorflow as tf
 import random
 import os
 
-#TRAIN_SET_DIR = '/home/jonghoon/GTSRB/TrainImages'
-#TEST_SET_DIR = '/home/jonghoon/GTSRB/TestImages'
+TRAIN_SET_DIR = '/home/jonghoon/GTSRB/TrainImages'
+TEST_SET_DIR = '/home/jonghoon/GTSRB/TestImages'
 
 class ReadFiles(object):
 	def __init__(self, batch_size, TRAIN_SET_DIR, TEST_SET_DIR, DEBUG=False):
@@ -406,13 +406,13 @@ class ReadFiles(object):
 			print 'Size of ''_batchImages'' : ' + str(len(self._batchImages))
 			print 'Size of ''_batchLabels'' : ' + str(len(self._batchLabels))
 
-#test = ReadFiles(batch_size = 20, TRAIN_SET_DIR = TRAIN_SET_DIR, TEST_SET_DIR = TEST_SET_DIR, DEBUG = True)
-##test2 = test.loadAllImagesAndLabels()
-##test2 = test.readTrainTrafficSigns()
-##test3 = test.readTestTrafficSigns()
-#flag = True
-#for i in range(0, 1000):
-#	test4 = test.feedTrainSet(initStatus = flag)
-#	flag = False
-#
-#test.debuggingMethod()
+test = ReadFiles(batch_size = 20, TRAIN_SET_DIR = TRAIN_SET_DIR, TEST_SET_DIR = TEST_SET_DIR, DEBUG = True)
+#test2 = test.loadAllImagesAndLabels()
+#test2 = test.readTrainTrafficSigns()
+#test3 = test.readTestTrafficSigns()
+flag = True
+for i in range(0, 1000):
+	test4 = test.feedTrainSet(initStatus = flag)
+	flag = False
+
+test.debuggingMethod()
